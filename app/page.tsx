@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, type PointerEvent, type ReactNode, useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import * as Dialog from "@radix-ui/react-dialog";
@@ -14,6 +14,8 @@ import {
   ChevronLeft,
   Clock3,
   CreditCard,
+  CircleCheck,
+  Heart,
   HeartPulse,
   LogOut,
   MapPin,
@@ -86,7 +88,7 @@ const metrics = {
 
 const money = (value: number) => value.toLocaleString("es-MX", { style: "currency", currency: "MXN" });
 
-function loadStoredState(): { branch?: BranchId; cart?: Record<number, number>; user?: User; orders?: Order[] } {
+function loadStoredState(): { branch?: BranchId; cart?: Record<number, number>; user?: User; orders?: Order[]; favorites?: number[] } {
   if (typeof window === "undefined") return {};
   try { return JSON.parse(window.localStorage.getItem("one-pharmacy-state") || "{}"); }
   catch { return {}; }
@@ -100,6 +102,27 @@ const reveal = {
   hidden: { opacity: 0, y: 22 },
   visible: { opacity: 1, y: 0 },
 };
+
+const serviceHighlights = [
+  [Store, "Inventario por sucursal"],
+  [Clock3, "Recoge el mismo día"],
+  [ShieldCheck, "Pago protegido"],
+  [Stethoscope, "Programa One Médico"],
+  [BadgePercent, "1 punto por cada $10"],
+] as const;
+
+function BrandMarquee() {
+  return <div className="brand-marquee" aria-label="Beneficios de One Pharmacy"><div className="marquee-track">{[...serviceHighlights, ...serviceHighlights].map(([Icon, label], index) => <span key={`${label}-${index}`} aria-hidden={index >= serviceHighlights.length}><Icon /> {label}<i /></span>)}</div></div>;
+}
+
+function SpotlightCard({ className = "", children }: { className?: string; children: ReactNode }) {
+  const moveSpotlight = (event: PointerEvent<HTMLElement>) => {
+    const bounds = event.currentTarget.getBoundingClientRect();
+    event.currentTarget.style.setProperty("--spotlight-x", `${event.clientX - bounds.left}px`);
+    event.currentTarget.style.setProperty("--spotlight-y", `${event.clientY - bounds.top}px`);
+  };
+  return <article className={`spotlight-card ${className}`} onPointerMove={moveSpotlight}>{children}</article>;
+}
 
 const WeeklySalesChart = dynamic(
   () => import("./components/DashboardCharts").then((module) => module.WeeklySalesChart),
@@ -121,6 +144,7 @@ export default function Home() {
   const [cartOpen, setCartOpen] = useState(false);
   const [user, setUser] = useState<User | null>(initialState.user || null);
   const [orders, setOrders] = useState<Order[]>(initialState.orders || []);
+  const [favorites, setFavorites] = useState<number[]>(initialState.favorites || []);
   const [lastOrder, setLastOrder] = useState<Order | null>(null);
   const [authTab, setAuthTab] = useState<"register" | "login">("register");
   const [doctorTab, setDoctorTab] = useState<"login" | "register">("login");
@@ -129,8 +153,8 @@ export default function Home() {
   const [adminBranch, setAdminBranch] = useState<BranchId | null>(null);
 
   useEffect(() => {
-    window.localStorage.setItem("one-pharmacy-state", JSON.stringify({ branch, cart, user, orders }));
-  }, [branch, cart, user, orders]);
+    window.localStorage.setItem("one-pharmacy-state", JSON.stringify({ branch, cart, user, orders, favorites }));
+  }, [branch, cart, user, orders, favorites]);
 
   const notify = (message: string) => {
     showToast(message);
@@ -154,6 +178,9 @@ export default function Home() {
   const addToCart = (id: number) => {
     setCart((current) => ({ ...current, [id]: (current[id] || 0) + 1 }));
     notify("Producto agregado al carrito");
+  };
+  const toggleFavorite = (id: number) => {
+    setFavorites((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id]);
   };
   const changeQuantity = (id: number, delta: number) => setCart((current) => {
     const next = { ...current, [id]: (current[id] || 0) + delta };
@@ -225,9 +252,29 @@ export default function Home() {
         </div>
         <div className="hero-image"><Image src="/one-pharmacy-hero.webp" alt="Atención personalizada en una sucursal One Pharmacy" width={1000} height={1000} sizes="(max-width: 900px) 100vw, 48vw" priority /><motion.div className="floating-card" initial={{ opacity: 0, x: -18 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: .55 }}><BadgePercent size={24} /><b>1×10</b><span>1 punto por cada $10</span><small>Cada 100 pts valen $50</small></motion.div><div className="branch-count"><Store size={20} /><b>04</b><span>sucursales<br />cerca de ti</span></div></div>
       </motion.section>
+      <BrandMarquee />
       <motion.section className="category-section page-width" initial="hidden" whileInView="visible" viewport={{ once: true, amount: .2 }} variants={reveal} transition={{ duration: .55 }}>
         <span className="eyebrow">Compra por categoría</span><h2>Todo lo que necesitas durante el tratamiento, <em>en un solo lugar.</em></h2>
         <div className="category-grid">{categories.slice(1).map((item, index) => { const Icon = categoryIcons[item]; return <motion.button key={item} whileHover={{ y: -8 }} whileTap={{ scale: .98 }} onClick={() => { setCategory(item); navigate("catalog"); }}><i><Icon aria-hidden="true" /></i><small>0{index + 1}</small><span>{item}</span><b><ArrowRight size={18} /></b></motion.button>; })}</div>
+      </motion.section>
+      <motion.section className="experience-section page-width" initial="hidden" whileInView="visible" viewport={{ once: true, amount: .15 }} variants={reveal} transition={{ duration: .6 }}>
+        <div className="section-heading"><div><span className="eyebrow">La experiencia One</span><h2>Más claridad para decidir, <em>más calma para cuidarte.</em></h2></div><p>Diseñamos cada paso alrededor de lo que importa: disponibilidad real, precios locales y acompañamiento cercano.</p></div>
+        <div className="experience-bento">
+          <SpotlightCard className="care-story">
+            <Image src="/pharmacist-shelves-pexels.jpg" alt="Profesional de farmacia frente a un anaquel de medicamentos" fill sizes="(max-width: 720px) 100vw, 58vw" />
+            <div className="care-overlay"><span className="eyebrow light">Atención especializada</span><h3>No somos una farmacia genérica.</h3><p>Un catálogo pensado para acompañar tratamientos y resolver necesidades cotidianas.</p><small>Fotografía: Ivan S · Pexels</small></div>
+          </SpotlightCard>
+          <SpotlightCard className="price-clarity">
+            <span className="bento-icon"><MapPin /></span><small>Precio local transparente</small><h3>Elige dónde te conviene recoger.</h3>
+            <div className="mini-price-list">{branches.slice(0, 3).map((item, index) => <div className={item.id === branch ? "active" : ""} key={item.id}><span><i />{item.name}</span><b>{money([349, 385, 362][index])}</b></div>)}</div>
+          </SpotlightCard>
+          <SpotlightCard className="loyalty-story">
+            <div><Logo compact /><BadgePercent /></div><span>One Lealtad</span><strong>185</strong><small>puntos disponibles</small><div className="points-progress"><i /></div><p>15 puntos más y desbloqueas $100 para tu próxima compra.</p>
+          </SpotlightCard>
+          <SpotlightCard className="pickup-story">
+            <span className="bento-icon"><PackageCheck /></span><small>Seguimiento claro</small><h3>Tu pedido, sin incertidumbre.</h3><div className="pickup-flow"><span className="done"><Check /> Confirmado</span><i /><span className="current"><Clock3 /> Preparando</span><i /><span><Store /> Listo para recoger</span></div>
+          </SpotlightCard>
+        </div>
       </motion.section>
       <section className="how-it-works"><div className="page-width"><span className="eyebrow light">Así de sencillo</span><h2>Tu pedido, listo cuando tú llegues.</h2><div className="steps">{[["01", "Elige tu sucursal", "Cada sucursal maneja sus precios e inventario."], ["02", "Compra y paga como prefieras", "Con tarjeta en línea o en caja al recoger."], ["03", "Recoge y gana puntos", "Te avisamos cuando esté listo y cada compra suma."]].map(([n, title, copy]) => <article key={n}><b>{n}</b><h3>{title}</h3><p>{copy}</p></article>)}</div></div></section>
       <section className="doctor-cta page-width"><div><span className="eyebrow">Programa profesional</span><h2>¿Eres profesional de la salud?</h2><p>Valida tu cédula una sola vez y obtén 10% de descuento permanente, con facturación automática.</p></div><button className="primary" onClick={() => navigate("doctor")}>Entrar al portal médico <ArrowRight size={17} /></button></section>
@@ -236,7 +283,8 @@ export default function Home() {
     {view === "catalog" && <main className="catalog page-width">
       <div className="catalog-heading"><div><span className="eyebrow">Compra local</span><h1>Sucursal {selectedBranch.name}</h1><p>{doctor ? "Tu descuento médico ya está aplicado. " : ""}Precios locales, inventario disponible y recolección el mismo día.</p></div><label className="search"><Search size={21} aria-hidden="true" /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar medicamentos y productos" aria-label="Buscar productos" /></label></div>
       <div className="category-tabs">{categories.map((item) => <button className={category === item ? "active" : ""} key={item} onClick={() => setCategory(item)}>{item}</button>)}</div>
-      {visibleProducts.length ? <motion.div layout className="product-grid">{visibleProducts.map((product) => { const base = product.prices[branch]; const price = doctor ? base * .9 : base; const ProductIcon = categoryIcons[product.cat]; return <motion.article layout className="product-card" key={product.id} initial={{ opacity: 0, scale: .98 }} animate={{ opacity: 1, scale: 1 }} whileHover={{ y: -6 }}><div className={`product-art art-${(product.id % 5) + 1}`}><span className="product-orbit" /><ProductIcon aria-hidden="true" />{product.rx && <b>Requiere receta</b>}</div><div className="product-content"><small>{product.cat}</small><h3>{product.name}</h3><p>{product.desc}</p>{product.rx && <span className="rx-note"><ReceiptText size={13} /> Presenta tu receta al recoger</span>}<div className="price-row"><div><strong>{money(price)}</strong>{doctor && <del>{money(base)}</del>}</div><motion.button whileTap={{ scale: .92 }} onClick={() => addToCart(product.id)} aria-label={`Agregar ${product.name}`}>Agregar <Plus size={16} /></motion.button></div></div></motion.article>})}</motion.div> : <div className="empty-state"><Search size={28} /><b>Sin resultados</b><p>Prueba con otra palabra o quita el filtro.</p></div>}
+      <div className="catalog-service-banner"><div><span className="banner-icon"><Store /></span><p><small>Recolecta hoy</small><b>{selectedBranch.name}, {selectedBranch.location}</b></p></div><span><CircleCheck /> Inventario de esta sucursal</span>{doctor ? <strong><Stethoscope /> 10% médico aplicado</strong> : <button onClick={() => navigate("doctor")}>Activa precio médico <ArrowRight /></button>}</div>
+      {visibleProducts.length ? <motion.div layout className="product-grid">{visibleProducts.map((product) => { const base = product.prices[branch]; const price = doctor ? base * .9 : base; const ProductIcon = categoryIcons[product.cat]; const favorite = favorites.includes(product.id); return <motion.article layout className="product-card" key={product.id} initial={{ opacity: 0, scale: .98 }} animate={{ opacity: 1, scale: 1 }} whileHover={{ y: -6 }}><div className={`product-art art-${(product.id % 5) + 1}`}><button className={`favorite-button ${favorite ? "active" : ""}`} onClick={() => toggleFavorite(product.id)} aria-label={`${favorite ? "Quitar" : "Agregar"} ${product.name} ${favorite ? "de" : "a"} favoritos`}><Heart fill={favorite ? "currentColor" : "none"} /></button><span className="availability"><CircleCheck /> Disponible hoy</span><span className="product-orbit" /><ProductIcon aria-hidden="true" />{product.rx && <b>Requiere receta</b>}</div><div className="product-content"><small>{product.cat}</small><h3>{product.name}</h3><p>{product.desc}</p><div className="product-branch"><MapPin /> {selectedBranch.name} · recolección hoy</div>{product.rx && <span className="rx-note"><ReceiptText size={13} /> Presenta tu receta al recoger</span>}<div className="price-row"><div><strong>{money(price)}</strong>{doctor && <del>{money(base)}</del>}</div><motion.button whileTap={{ scale: .92 }} onClick={() => addToCart(product.id)} aria-label={`Agregar ${product.name}`}>Agregar <Plus size={16} /></motion.button></div></div></motion.article>})}</motion.div> : <div className="empty-state"><Search size={28} /><b>Sin resultados</b><p>Prueba con otra palabra o quita el filtro.</p></div>}
       <p className="catalog-note">Precios en MXN, IVA incluido. Los productos ℞ requieren receta al recoger en sucursal.</p>
     </main>}
 
