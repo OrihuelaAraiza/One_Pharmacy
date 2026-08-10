@@ -31,7 +31,7 @@ export function WeeklySalesChart({ data, gradientId }: { data: WeeklySalesPoint[
       <XAxis dataKey="week" axisLine={false} tickLine={false} tick={axisTick} />
       <YAxis axisLine={false} tickLine={false} tick={axisTick} />
       <Tooltip contentStyle={tooltipStyle} formatter={(value) => [`$${value}k`, "Ventas"]} />
-      <Area type="monotone" dataKey="value" stroke="#151a67" strokeWidth={3} fill={`url(#${gradientId})`} />
+      <Area type="monotone" dataKey="value" stroke="#1b2388" strokeWidth={3} fill={`url(#${gradientId})`} />
     </AreaChart>
   </ResponsiveContainer>;
 }
@@ -43,7 +43,7 @@ export function BranchSalesChart({ data }: { data: BranchSalesPoint[] }) {
       <XAxis dataKey="name" axisLine={false} tickLine={false} tick={axisTick} />
       <YAxis axisLine={false} tickLine={false} tick={axisTick} />
       <Tooltip cursor={{ fill: "rgba(93,168,149,.08)" }} contentStyle={tooltipStyle} formatter={(value) => [Number(value).toLocaleString("es-MX", { style: "currency", currency: "MXN" }), "Ventas"]} />
-      <Bar dataKey="sales" fill="#151a67" radius={[10, 10, 2, 2]} />
+      <Bar dataKey="sales" fill="#1b2388" radius={[10, 10, 2, 2]} />
     </BarChart>
   </ResponsiveContainer>;
 }

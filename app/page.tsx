@@ -95,7 +95,7 @@ function loadStoredState(): { branch?: BranchId; cart?: Record<number, number>; 
 }
 
 function Logo({ compact = false }: { compact?: boolean }) {
-  return <span className={`logo ${compact ? "logo-compact" : ""}`}><i aria-hidden="true"><b /><em /></i><strong>One</strong> Pharmacy</span>;
+  return <span className={`logo ${compact ? "logo-compact" : ""}`}><svg viewBox="0 0 50 64" aria-hidden="true"><path className="logo-mint" d="M14 0h10v29H0V14C0 6.3 6.3 0 14 0Z" /><path className="logo-mint" d="M0 35h24v15c0 7.7-6.3 14-14 14H0V35Z" /><path className="logo-blue-gray" d="M27 0h9c7.7 0 14 6.3 14 14H27V0Z" /><path className="logo-navy" d="M27 17h23c0 6.6-5.4 12-12 12H27V17Z" /></svg><span className="logo-words"><strong>One</strong><b>Pharmacy</b></span></span>;
 }
 
 const reveal = {

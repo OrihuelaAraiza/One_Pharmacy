@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import { DM_Sans, Fraunces } from "next/font/google";
+import { Dongle, Urbanist } from "next/font/google";
 import { headers } from "next/headers";
 import "./globals.css";
 
-const sans = DM_Sans({ variable: "--font-sans", subsets: ["latin"] });
-const display = Fraunces({ variable: "--font-display", subsets: ["latin"] });
+const sans = Urbanist({ variable: "--font-sans", subsets: ["latin"], weight: ["300", "400", "600", "700", "800"] });
+const display = Dongle({ variable: "--font-display", subsets: ["latin"], weight: ["300", "400", "700"] });
 
 export async function generateMetadata(): Promise<Metadata> {
   const requestHeaders = await headers();
