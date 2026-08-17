@@ -114,3 +114,46 @@ footer { padding:30px max(24px,calc((100vw - 1180px)/2)); border-top:1px solid v
 @keyframes loader-turn{0%{transform:rotate(0)}45%{transform:rotate(180deg)}100%{transform:rotate(360deg)}}@keyframes loader-ring{0%{transform:scale(.72);opacity:0}35%{opacity:1}100%{transform:scale(1.25);opacity:0}}@keyframes loader-breathe{50%{transform:scale(1.04)}}
 @media(max-width:1000px){.role-gateway{grid-template-columns:1fr}.admin-login{grid-template-columns:1fr;background:linear-gradient(180deg,var(--ink) 0 38%,#f7f7f7 38%)}.portal-intro{padding-top:20px}.quick-create{grid-template-columns:1fr 1fr 1fr}.product-create form{grid-template-columns:1fr 1fr}.product-create .wide-field{grid-column:1/-1}}
 @media(max-width:720px){.branch-picker{min-width:0}.branch-picker>svg:last-child{display:none}.branch-menu{position:fixed;left:14px;right:14px;top:78px;width:auto}.role-gateway{padding-top:45px;gap:25px}.role-cards{grid-template-columns:1fr}.role-cards button{min-height:120px}.role-gateway h2{font-size:45px}.checkout-checks{display:grid}.order-timeline{display:grid;grid-template-columns:1fr}.order-timeline i{width:1px;height:15px;margin-left:7px}.admin-login{display:block;background:linear-gradient(180deg,var(--ink) 0 430px,#f7f7f7 430px);padding-top:45px}.portal-intro{margin-bottom:60px}.portal-intro h1{font-size:58px}.dashboard-heading{display:grid}.permission-chip{width:max-content}.inventory-head{display:none}.inventory-row{grid-template-columns:1fr 1fr}.inventory-row>span{grid-column:1/-1}.product-create form,.branch-admin-grid,.quick-create{grid-template-columns:1fr}.product-create .wide-field{grid-column:auto}.panel-heading{display:grid}.global-catalog .panel-heading>label{min-width:0}}
+
+/* UX polish: clearer focus, catalog feedback and a recoverable mobile journey. */
+.skip-link{position:fixed;z-index:1000;left:16px;top:12px;transform:translateY(-150%);border-radius:10px;background:var(--ink);color:#fff;padding:11px 15px;font-weight:800;text-decoration:none;box-shadow:0 10px 30px rgba(27,35,136,.24)}
+.skip-link:focus{transform:translateY(0)}
+#main-content:focus{outline:none}
+:where(button,a,input,select):focus-visible{outline:3px solid rgba(93,168,149,.52);outline-offset:3px}
+:where(.primary,.cart-button,.benefits-action,.super-admin-button):focus-visible{outline-color:#a7d9ca}
+button:disabled{cursor:not-allowed}
+.brand-button,.site-header nav button,.branch-picker,.text-action,.cart-button{min-height:44px}
+.catalog-toolbar{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:30px 0 22px}
+.catalog-toolbar .category-tabs{padding:0;min-width:0}
+.catalog-results{display:flex;align-items:center;gap:12px;flex:none;color:var(--muted);font-size:12px}
+.catalog-results span b{color:var(--ink)}
+.catalog-results button{display:inline-flex;align-items:center;gap:5px;border:0;border-radius:99px;background:#f1f2f7;color:var(--ink);padding:9px 11px;font-size:11px;font-weight:800}
+.catalog-results button svg{width:14px;height:14px}
+.empty-state .secondary{margin-top:8px;padding:11px 16px}
+.remove-item{width:max-content;border:0;background:none;color:#92504d;padding:5px 0;font-size:10px;font-weight:800;display:inline-flex;align-items:center;gap:4px}
+.remove-item svg{width:12px;height:12px}
+.mobile-dock{display:none}
+
+@media(max-width:720px){
+  .app-shell{padding-bottom:calc(76px + env(safe-area-inset-bottom))}
+  .site-header{box-shadow:0 8px 24px rgba(27,35,136,.055)}
+  .site-header .cart-button{display:none}
+  .branch-picker{min-height:44px;padding:8px 11px}
+  .branch-picker span{display:grid}
+  .branch-picker span small{display:none}
+  .branch-picker span b{max-width:92px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .mobile-dock{position:fixed;z-index:80;left:10px;right:10px;bottom:calc(8px + env(safe-area-inset-bottom));height:64px;display:grid;grid-template-columns:repeat(4,1fr);padding:5px;border:1px solid rgba(27,35,136,.1);border-radius:21px;background:rgba(255,255,255,.95);box-shadow:0 16px 45px rgba(27,35,136,.2);backdrop-filter:blur(18px)}
+  .mobile-dock button{position:relative;min-width:0;border:0;border-radius:16px;background:transparent;color:#73788a;display:grid;place-items:center;align-content:center;gap:2px;padding:4px;font-size:9px;font-weight:800}
+  .mobile-dock button svg{width:20px;height:20px;stroke-width:1.8}
+  .mobile-dock button.active{background:rgba(93,168,149,.13);color:var(--ink)}
+  .mobile-dock button b{position:absolute;top:2px;left:calc(50% + 7px);min-width:17px;height:17px;padding:0 4px;border-radius:99px;background:var(--ink);color:#fff;display:grid;place-items:center;font-size:9px}
+  .catalog-toolbar{display:grid;gap:10px;padding:26px 0 18px}
+  .catalog-toolbar .category-tabs{width:calc(100vw - 28px);margin-right:-14px;padding-right:14px}
+  .catalog-results{justify-content:space-between}
+  .hero-copy h1,.auth-story h1{font-size:58px}
+  .catalog-heading h1,.checkout h1,.success h1,.account-heading h1,.dashboard>h1{font-size:52px}
+  .form-card h1,.form-card h2{font-size:49px}
+  .cart-drawer{height:100dvh;padding-bottom:env(safe-area-inset-bottom)}
+  .cart-items{padding-inline:18px}
+  footer{margin-bottom:0}
+}
